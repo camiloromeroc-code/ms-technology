@@ -1,4 +1,10 @@
 package com.bootcamps.ms_technologies.domain.model;
 
-public class Technology {
+public record Technology(
+        Long id,
+        String name,
+        String description
+) {
 }
+
+
