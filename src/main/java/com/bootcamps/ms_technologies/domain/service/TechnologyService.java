@@ -14,7 +14,9 @@ public class TechnologyService {
     private final TechnologyRepositoryPort repository;
 
     public Mono<Technology> createTechnology(Technology technology) {
-        return repository.existsByName(technology.name())
+
+        return validateTechnology(technology)
+                .then(repository.existsByName(technology.name()))
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(new IllegalArgumentException("La tecnología ya existe"));
@@ -22,6 +24,17 @@ public class TechnologyService {
                     return repository.save(technology);
                 });
     }
+
+    private static Mono<Void> validateTechnology(Technology technology) {
+        if (technology.name() == null || technology.name().isBlank() || technology.name().length() > 50) {
+            return Mono.error(new IllegalArgumentException("Nombre obligatorio y máximo 50 caracteres"));
+        }
+        if (technology.description() == null || technology.description().isBlank() || technology.description().length() > 90) {
+            return Mono.error(new IllegalArgumentException("Descripción obligatoria y máximo 90 caracteres"));
+        }
+        return Mono.empty();
+    }
+
 
     public Flux<Technology> listTechnologies() {
         return repository.findAll();
